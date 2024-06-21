@@ -79,11 +79,10 @@ def get_registration_answer(message):
 def callback_worker(call):
     if call.data == "yes": #call.data это callback_data, которую мы указали при объявлении кнопки
         bot.send_message(call.message.chat.id, "Отлично. Чем я могу тебе помочь, "+name);
+        bot.answer_callback_query(call.id, text="") #Устраняет проблему, что кнопка остается активной после нажатия на нее
     elif call.data == "no":
         bot.send_message(call.message.chat.id, "Тогда давай заново)\n\nКак тебя зовут?");
         bot.register_next_step_handler(call.message, get_name); #следующий шаг – функция get_name
-
-
-#ЕСТЬ ПРОБЛЕМА, ЧТО КНОПКИ НА КЛАВИАТУРЕ ОСТАЮТСЯ АКТИВНЫМИ ПОСЛЕ НАЖАТИЯ
+        bot.answer_callback_query(call.id, text="") #Устраняет проблему, что кнопка остается активной после нажатия на нее
 
 bot.polling(none_stop=True, interval=0)
