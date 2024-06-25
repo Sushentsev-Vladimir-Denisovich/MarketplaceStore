@@ -124,7 +124,6 @@ def get_order_number(message):
     if message.text == const.start:
         start(message);
     else:
-        #global order_number;
         while gl.order_number == 0: #проверяем что возраст изменился
             try:
                 gl.order_number = int(message.text) #проверяем, что возраст введен корректно
