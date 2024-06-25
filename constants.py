@@ -16,12 +16,14 @@ keyboard_OZON_name = "Мы на OZON";
 keyboard_OZON_URL = "https://ozon.ru/t/d003na8";
 keyboard_WB_name = "Мы на Wildberries";
 keyboard_WB_URL = "";
+keyboard_back = "Вернуться в главное меню";
 
 # Наименования callback-ов
 clbk_question = "question";
 clbk_problem = "problem";
 clbk_ozon = "ozon";
 clbk_wb = "wb";
+clbk_back = "back";
 
 # Разделитель
 delimeter = "%";
