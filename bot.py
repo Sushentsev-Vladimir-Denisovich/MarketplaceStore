@@ -42,8 +42,8 @@ def start(message):
             except Exception:
                 bot.send_message(gl.admin_id, const.incorrect_user_id);
         else:
-            if (user_id != 0):
-                bot.send_message(user_id, message.text);
+            if (gl.user_id != 0):
+                bot.send_message(gl.user_id, message.text);
             else:
                 bot.send_message(gl.admin_id, const.not_user_id);
     else:
@@ -56,13 +56,16 @@ def start(message):
     #global user_id;
     gl.user_id = message.from_user.id;
     #Реализация через клавиатуру
-    keyboard = init_keyboard();
-    init_keyboard();
+    keyboard = init_main_keyboard();
     bot.send_message(message.from_user.id, text=const.welcome_message, reply_markup=keyboard)
 
+def back(call):
+    keyboard = init_main_keyboard();
+    bot.send_message(call.message.chat.id, text=const.welcome_message, reply_markup=keyboard)
+
 # Метод для инициализации пользовательской клавиатуры
-def init_keyboard():
-    keyboard = types.InlineKeyboardMarkup(); #наша клавиатура
+def init_main_keyboard():
+    keyboard = types.InlineKeyboardMarkup();
     key_question = types.InlineKeyboardButton(text=const.keyboard_question, callback_data=const.clbk_question); #кнопка «Да»
     #keyboard.add(key_question); #добавляем кнопку в клавиатуру
     key_problem= types.InlineKeyboardButton(text=const.keyboard_problem, callback_data=const.clbk_problem);
@@ -70,6 +73,13 @@ def init_keyboard():
     key_link_wb= types.InlineKeyboardButton(text=const.keyboard_WB_name, url = const.keyboard_WB_URL, callback_data=const.clbk_wb);
     keyboard.row(key_question, key_problem);
     keyboard.row(key_link_ozon, key_link_wb);
+    return keyboard;
+
+# Метод для инициализации пользовательской клавиатуры
+def init_additional_keyboard():
+    keyboard = types.InlineKeyboardMarkup();
+    key_back= types.InlineKeyboardButton(text=const.keyboard_back, callback_data=const.clbk_back);
+    keyboard.add(key_back);
     return keyboard;
 
 #Метод для считывая и запоминания имени
@@ -113,9 +123,9 @@ def get_age(message):
 def get_question(message):
     if message.text == const.start:
         start(message);
-    else:
+    elif gl.current_clbk == const.clbk_question: # Если не сравнивать текущий callback с предусматриваемым в методе, то возникает проблема, что юзер может нажать одну кнопку, начать сценарий работы, а затем нажать другую и пойдут параллельно 2 сценария
         question = message.text;
-        formatted_question = "Вопрос от пользователя: "+ str(gl.user_id) + "\n\n" + question;
+        formatted_question = "Вопрос от пользователя: "+ str(message.from_user.id) + "\n\n" + question;
         bot.send_message(gl.admin_id, formatted_question);
         bot.register_next_step_handler(message, get_question);
 
@@ -123,7 +133,7 @@ def get_question(message):
 def get_order_number(message):
     if message.text == const.start:
         start(message);
-    else:
+    elif gl.current_clbk == const.clbk_problem:
         while gl.order_number == 0: #проверяем что возраст изменился
             try:
                 gl.order_number = int(message.text) #проверяем, что возраст введен корректно
@@ -146,12 +156,23 @@ def get_problem(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == const.clbk_question:
-        bot.send_message(call.message.chat.id, const.question_message);
+        #РАСКОММЕНИТИТЬ, ЧТОБ БЫЛА КЛАВИАТУРА "НАЗАД"
+        #keyboard = init_additional_keyboard();
+        #bot.send_message(call.message.chat.id, text=const.question_message, reply_markup=keyboard);
+        gl.current_clbk = const.clbk_question;
+        bot.send_message(call.message.chat.id, text=const.question_message);
         bot.register_next_step_handler(call.message, get_question); #следующий шаг – функция get_question
         bot.answer_callback_query(call.id, text="")
     elif call.data == const.clbk_problem:
+        #РАСКОММЕНИТИТЬ, ЧТОБ БЫЛА КЛАВИАТУРА "НАЗАД"
+        #keyboard = init_additional_keyboard();
+        #bot.send_message(call.message.chat.id, const.order_nuber_message, reply_markup=keyboard);
+        gl.current_clbk = const.clbk_problem;
         bot.send_message(call.message.chat.id, const.order_nuber_message);
         bot.register_next_step_handler(call.message, get_order_number); #следующий шаг – функция get_order_number
         bot.answer_callback_query(call.id, text="")
+    elif call.data == const.clbk_back:
+        back(call);
+        bot.register_next_step_handler(call.message);
 
 bot.polling(none_stop=True, interval=0)
