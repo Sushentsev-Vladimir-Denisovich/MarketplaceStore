@@ -1,17 +1,14 @@
 import constants as const
 import global_variables as gl
 
+import random
+
 from telebot import TeleBot
 from telebot import types
 
 bot = TeleBot('6234632894:AAFeXsjhbfMBrCkYsCiU-PQxzDW-a34Kots')
 
-# ИЗМЕНИТЬ КЛАВИАТУРУ, ЧТОБ БЫЛО НЕ 4 КНОПКИ В КОЛОНКУ, А 2 КОЛОНКИ ПО 2 КНОПКИ
-# ДОБАВИТЬ ССЫЛКИ НА OZON, WB
 # СДЕЛАТЬ КЛАВИАТУРЫ ДЛЯ ЗАДАНИЯ ВОПРОСА И ОПИСАНИЯ ПРОБЛЕМЫ С ВОЗМОЖНОСТЬЮ ВЕРНУТЬСЯ НАЗАД К ГЛАВНОМУ МЕНЮ
-
-# НУЖНО ЗАТЕСТИТЬ МНОГОПОЛЬЗОВАТЕЛЬНОСТЬ. ВЗЯТЬ ТЕЛЕФОН У КРИСТИНЫ, СНАЧАЛА Я ОТПРАВЛЯЮ СООБЩЕНИЕ ЧТОБ ЗАПИСАЛОСЬ ЗНАЧЕНИЕ В user_id, ЗАТЕМ ОНА ОТПРАВЛЯЕТ, ЧТОБ ОНО ПЕРЕЗАПИСАЛОСЬ.
-# ДАЛЕЕ СНОВА Я. ТАКИМ ОБРАОМ УЗНАЕТ, ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЕЙСТВУЮТ В РАМКАХ СЕССИИ ИЛИ ВСЕГДА
 
 
 # @bot.message_handler(content_types=['text'])
@@ -25,11 +22,24 @@ bot = TeleBot('6234632894:AAFeXsjhbfMBrCkYsCiU-PQxzDW-a34Kots')
 #     else:
 #         bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
 
+@bot.message_handler(commands=['start'])
+def start(message):
+    main_menu(message)
 
+@bot.message_handler(commands=['help'])
+def start(message):
+    get_help(message)
+
+
+@bot.message_handler(content_types=['sticker'])
+#Метод для обработки начала работы бота
+def text_message(message):
+    sticker_index = random.randint(0, len(const.stickers));
+    bot.send_sticker(message.from_user.id, const.stickers[sticker_index])
 
 @bot.message_handler(content_types=['text'])
 #Метод для обработки начала работы бота
-def start(message):
+def text_message(message):
     #global user_id;
 
     if message.from_user.id == gl.admin_id:
@@ -47,12 +57,12 @@ def start(message):
             else:
                 bot.send_message(gl.admin_id, const.not_user_id);
     else:
-        if message.text == const.start:
-            start(message);
-        else:
-            bot.send_message(message.from_user.id, const.wait_start);
+        bot.send_message(message.from_user.id, const.wait_start);
 
-def start(message):
+def get_help(message):
+    bot.send_message(message.from_user.id, text="Для начала работы введите /start")
+
+def main_menu(message):
     #global user_id;
     gl.user_id = message.from_user.id;
     #Реализация через клавиатуру
