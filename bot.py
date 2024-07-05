@@ -24,11 +24,21 @@ bot = TeleBot('6234632894:AAFeXsjhbfMBrCkYsCiU-PQxzDW-a34Kots')
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    main_menu(message)
+    if message.from_user.id == gl.admin_id:
+        bot.send_message(gl.admin_id, const.start_message_for_admin);
+    else:
+        main_menu(message)
 
 @bot.message_handler(commands=['help'])
-def start(message):
+def help(message):
     get_help(message)
+
+@bot.message_handler(commands=['stop'])
+def stop(message):
+    if message.from_user.id == gl.admin_id:
+        bot.stop_polling();
+    else:
+        bot.send_message(message.from_user.id, const.wait_start);
 
 
 @bot.message_handler(content_types=['sticker'])
@@ -158,7 +168,7 @@ def get_problem(message):
         start(message);
     else:
         problem = message.text;
-        formatted_question = "Проблема от пользователя: "+ str(gl.user_id) + "\nНомер заказа " + str(gl.order_number) + "\n\n" + problem;
+        formatted_question = "Проблема от пользователя: "+ str(gl.user_id) + "\nНомер заказа: " + str(gl.order_number) + "\n\n" + problem;
         bot.send_message(gl.admin_id, formatted_question);
         bot.register_next_step_handler(message, get_problem);
 
