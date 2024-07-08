@@ -8,20 +8,6 @@ from telebot import types
 
 bot = TeleBot('6234632894:AAFeXsjhbfMBrCkYsCiU-PQxzDW-a34Kots')
 
-# СДЕЛАТЬ КЛАВИАТУРЫ ДЛЯ ЗАДАНИЯ ВОПРОСА И ОПИСАНИЯ ПРОБЛЕМЫ С ВОЗМОЖНОСТЬЮ ВЕРНУТЬСЯ НАЗАД К ГЛАВНОМУ МЕНЮ
-
-
-# @bot.message_handler(content_types=['text'])
-# def get_text_messages(message):
-#     if message.text == "/start":
-#         bot.send_message(message.from_user.id, "Здравствуйте!\n\nЯ бот онлайн магазина DwellWell. Пожалуйста, выберите, чем я могу вам помочь.")
-#     elif message.text == "Привет":
-#         bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
-#     elif message.text == "/help":
-#         bot.send_message(message.from_user.id, "Напиши привет")
-#     else:
-#         bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
-
 @bot.message_handler(commands=['start'])
 def start(message):
     if message.from_user.id == gl.admin_id:
@@ -125,10 +111,6 @@ def get_age(message):
         except Exception:
             bot.send_message(message.from_user.id, 'Цифрами, пожалуйста');
             bot.register_next_step_handler(message, get_age);
-    #Реализация через сообщение
-    # answer = "Тебе "+str(age)+" лет, тебя зовут "+name+" "+surname+"?"
-    # bot.send_message(message.from_user.id, answer)
-    # bot.register_next_step_handler(message, get_registration_answer);
     
     #Реализация через клавиатуру
     keyboard = types.InlineKeyboardMarkup(); #наша клавиатура
@@ -154,14 +136,13 @@ def get_order_number(message):
     if message.text == const.start:
         start(message);
     elif gl.current_clbk == const.clbk_problem:
-        while gl.order_number == 0: #проверяем что возраст изменился
-            try:
-                gl.order_number = int(message.text) #проверяем, что возраст введен корректно
-            except Exception:
-                bot.send_message(message.from_user.id, const.wait_number);
-                bot.register_next_step_handler(message, get_order_number);
-        bot.send_message(gl.user_id, const.problem_message);
-        bot.register_next_step_handler(message, get_problem);
+        try:
+            gl.order_number = int(message.text) #проверяем, что возраст введен корректно
+            bot.send_message(gl.user_id, const.problem_message);
+            bot.register_next_step_handler(message, get_problem);
+        except Exception:
+            bot.send_message(message.from_user.id, const.wait_number);
+            bot.register_next_step_handler(message, get_order_number);
 
 def get_problem(message):
     if message.text == const.start:
